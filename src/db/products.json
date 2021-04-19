@@ -81,11 +81,11 @@
     "name": "Murphy's War",
     "description": "deploy synergistic infrastructures",
     "brand": "Dodge",
-    "imageURL": "http://dummyimage.com/300x300.png/5fa2dd/ffffff",
+    "imageURL": "http://localhost:undefined/ricoh-executive-boardroom.jpeg",
     "category": "Horror",
     "price": "$79.38",
     "createdAt": "2021-02-28T15:29:16Z",
-    "updatedAt": "2020-05-23T21:30:56Z"
+    "updatedAt": "2021-04-19T14:28:05.446Z"
   },
   {
     "id": "6634dd02-5666-4c05-9746-d8fcbb076f0a",
