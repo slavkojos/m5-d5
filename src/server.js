@@ -5,6 +5,7 @@ import { dirname, join } from "path";
 import productsRoute from "./services/products.js";
 import reviewsRoute from "./services/reviews.js";
 import listEndpoints from "express-list-endpoints";
+import { badRequestErrorHandler, notFoundErrorHandler, forbiddenErrorHandler, catchAllErrorHandler } from "./errorHandling.js";
 
 const currentWorkingFile = fileURLToPath(import.meta.url);
 const currentWorkingDirectory = dirname(currentWorkingFile);
@@ -21,6 +22,11 @@ app.use(express.json());
 
 app.use("/products", productsRoute);
 app.use("/reviews", reviewsRoute);
+
+app.use(badRequestErrorHandler);
+app.use(notFoundErrorHandler);
+app.use(forbiddenErrorHandler);
+app.use(catchAllErrorHandler);
 
 const PORT = process.env.PORT || 5000;
 console.log(listEndpoints(app));
