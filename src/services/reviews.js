@@ -18,7 +18,7 @@ const currentWorkingFile = fileURLToPath(import.meta.url);
 
 const currentWorkingDirectory = dirname(currentWorkingFile);
 
-const publicFolderDirectory = join(currentWorkingDirectory, "../../../public");
+const publicFolderDirectory = join(currentWorkingDirectory, "../../public");
 
 const productsDB = join(currentWorkingDirectory, "../db/products.json");
 const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
@@ -29,19 +29,11 @@ route.get("/", async (req, res, next) => {
     const reviews = await getReviews();
 
     if (req.query && req.query.comment) {
-      let filteredReviews = reviews.filter(
-        (review) =>
-          review.hasOwnProperty("comment") &&
-          review.comment === req.query.comment
-      );
+      let filteredReviews = reviews.filter((review) => review.hasOwnProperty("comment") && review.comment === req.query.comment);
 
       res.send(filteredReviews);
     } else if (req.query && req.query.rate) {
-      let filteredReviews = reviews.filter(
-        (review) =>
-          review.hasOwnProperty("rate") &&
-          review.rate === parseInt(req.query.rate)
-      );
+      let filteredReviews = reviews.filter((review) => review.hasOwnProperty("rate") && review.rate === parseInt(req.query.rate));
 
       res.send(filteredReviews);
     } else {
@@ -82,10 +74,7 @@ route.get("/:id", async (req, res, next) => {
 
 route.post(
   "/",
-  [
-    check("comment").exists().withMessage("Comment is mandatory field!"),
-    check("rate").isInt().withMessage("Rating must be an integer!"),
-  ],
+  [check("comment").exists().withMessage("Comment is mandatory field!"), check("rate").isInt().withMessage("Rating must be an integer!")],
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
@@ -117,9 +106,7 @@ route.delete("/:id", async (req, res, next) => {
   try {
     const reviews = await getReviews();
 
-    const newReviews = reviews.filter(
-      (student) => student.ID !== req.params.id
-    );
+    const newReviews = reviews.filter((student) => student.ID !== req.params.id);
     await writeReviews(newReviews);
     res.status(204).send();
   } catch (error) {
