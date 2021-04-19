@@ -4,6 +4,8 @@ import { fileURLToPath } from "url";
 
 import { dirname, join } from "path";
 
+import { getReviews, writeReviews } from "../lib/fs-tools.js";
+
 import fs from "fs-extra";
 
 import multer from "multer";
@@ -29,11 +31,19 @@ route.get("/", async (req, res, next) => {
     const reviews = await getReviews();
 
     if (req.query && req.query.comment) {
-      let filteredReviews = reviews.filter((review) => review.hasOwnProperty("comment") && review.comment === req.query.comment);
+      let filteredReviews = reviews.filter(
+        (review) =>
+          review.hasOwnProperty("comment") &&
+          review.comment === req.query.comment
+      );
 
       res.send(filteredReviews);
     } else if (req.query && req.query.rate) {
-      let filteredReviews = reviews.filter((review) => review.hasOwnProperty("rate") && review.rate === parseInt(req.query.rate));
+      let filteredReviews = reviews.filter(
+        (review) =>
+          review.hasOwnProperty("rate") &&
+          review.rate === parseInt(req.query.rate)
+      );
 
       res.send(filteredReviews);
     } else {
@@ -74,7 +84,11 @@ route.get("/:id", async (req, res, next) => {
 
 route.post(
   "/",
-  [check("comment").exists().withMessage("Comment is mandatory field!"), check("rate").isInt().withMessage("Rating must be an integer!")],
+  [
+    check("comment").exists().withMessage("Comment cannot be empty"),
+    check("rate").isInt().withMessage("Rating must be an integer!"),
+    check("productId").exists().withMessage("A product ID must be included"),
+  ],
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
@@ -93,7 +107,7 @@ route.post(
 
         await writeReviews(reviews);
 
-        res.status(201).send({ _id: newReview.ID });
+        res.status(201).send({ _id: newReview._id });
       }
     } catch (error) {
       error.httpStatusCode = 500;
@@ -106,7 +120,9 @@ route.delete("/:id", async (req, res, next) => {
   try {
     const reviews = await getReviews();
 
-    const newReviews = reviews.filter((student) => student.ID !== req.params.id);
+    const newReviews = reviews.filter(
+      (student) => student.ID !== req.params.id
+    );
     await writeReviews(newReviews);
     res.status(204).send();
   } catch (error) {

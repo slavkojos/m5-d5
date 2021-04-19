@@ -24,6 +24,20 @@ const publicFolderDirectory = join(currentWorkingDirectory, "../../public");
 const productsDB = join(currentWorkingDirectory, "../db/products.json");
 const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 
+route.get("/", async (req, res, next) => {
+  const products = await fs.readJSON(productsDB);
+
+  if (req.query && req.query.category) {
+    const filteredProducts = products.filter(
+      (product) => product.hasOwnProperty("category") && product.category.toLowerCase() === req.query.category.toLowerCase()
+    );
+
+    res.send(filteredProducts);
+  } else {
+    res.send(products);
+  }
+});
+
 route.get("/:id", async (req, res, next) => {
   try {
     const products = await fs.readJSON(productsDB);
@@ -91,7 +105,10 @@ route.post(
         };
         products.push(newProduct);
         await fs.writeJSON(productsDB, products);
-        res.status(201).send({ id: newProduct.id, message: "New product successfully created" });
+        res.status(201).send({
+          id: newProduct.id,
+          message: "New product successfully created",
+        });
       }
     } catch (error) {
       console.log(error);
