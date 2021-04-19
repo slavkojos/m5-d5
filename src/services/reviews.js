@@ -20,6 +20,8 @@ const currentWorkingFile = fileURLToPath(import.meta.url);
 
 const currentWorkingDirectory = dirname(currentWorkingFile);
 
+const publicFolderDirectory = join(currentWorkingDirectory, "../../public");
+
 const productsDB = join(currentWorkingDirectory, "../db/products.json");
 const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 
