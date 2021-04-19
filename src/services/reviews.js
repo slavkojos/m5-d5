@@ -34,9 +34,8 @@ route.get("/", async (req, res, next) => {
       let filteredReviews = reviews.filter(
         (review) =>
           review.hasOwnProperty("comment") &&
-          review.comment === req.query.comment
+          review.comment.includes(req.query.comment)
       );
-
       res.send(filteredReviews);
     } else if (req.query && req.query.rate) {
       let filteredReviews = reviews.filter(
@@ -120,9 +119,7 @@ route.delete("/:id", async (req, res, next) => {
   try {
     const reviews = await getReviews();
 
-    const newReviews = reviews.filter(
-      (student) => student.ID !== req.params.id
-    );
+    const newReviews = reviews.filter((review) => review._id !== req.params.id);
     await writeReviews(newReviews);
     res.status(204).send();
   } catch (error) {
