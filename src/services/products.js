@@ -28,10 +28,10 @@ route.get("/", async (req, res, next) => {
   const products = await fs.readJSON(productsDB);
 
   if (req.query && req.query.category) {
-    let filteredProducts = products.filter(
+    const filteredProducts = products.filter(
       (product) =>
         product.hasOwnProperty("category") &&
-        product.category === req.query.category
+        product.category.toLowerCase() === req.query.category.toLowerCase()
     );
 
     res.send(filteredProducts);
@@ -115,12 +115,10 @@ route.post(
         };
         products.push(newProduct);
         await fs.writeJSON(productsDB, products);
-        res
-          .status(201)
-          .send({
-            id: newProduct.id,
-            message: "New product successfully created",
-          });
+        res.status(201).send({
+          id: newProduct.id,
+          message: "New product successfully created",
+        });
       }
     } catch (error) {
       console.log(error);
