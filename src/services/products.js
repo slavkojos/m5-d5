@@ -1,22 +1,15 @@
-import { Router } from "express";
-
+import { query, Router } from "express";
 import { fileURLToPath } from "url";
-
 import { dirname, join } from "path";
-
 import fs from "fs-extra";
-
 import multer from "multer";
-
 import { v4 as uniqid } from "uuid";
-
 import { checkSchema, validationResult, check } from "express-validator";
 import checkFileType from "../middlewares/checkfiletype.js";
 const route = Router();
 const upload = multer();
 
 const currentWorkingFile = fileURLToPath(import.meta.url);
-
 const currentWorkingDirectory = dirname(currentWorkingFile);
 
 const publicFolderDirectory = join(currentWorkingDirectory, "../../public");
@@ -25,19 +18,65 @@ const productsDB = join(currentWorkingDirectory, "../db/products.json");
 const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 
 route.get("/", async (req, res, next) => {
-  const products = await fs.readJSON(productsDB);
-
-  if (req.query && req.query.category) {
-    const filteredProducts = products.filter(
-      (product) => product.hasOwnProperty("category") && product.category.toLowerCase() === req.query.category.toLowerCase()
+  const filterProducts = await fs.readJSON(productsDB);
+  if ((req.query && req.query.name) || req.query.category) {
+    const filteringProducts = filterProducts.filter(
+      (e) =>
+        e.category.toLowerCase() === req.query.category.toLowerCase() ||
+        e.name.toLowerCase() === req.query.name.toLowerCase()
     );
-
-    res.send(filteredProducts);
+    res.send(filteringProducts);
   } else {
-    res.send(products);
+    res.send(filterProducts);
   }
 });
 
+route.get("/:id/reviews", async (req, res, next) => {
+  try {
+    const gettingReviews = await fs.readJSON(productsDB);
+    const reqId = req.params.id;
+    const grabbingTheReviews = gettingReviews.filter((e) => e._id === reqId);
+    if (grabbingTheReviews) {
+      res.send(grabbingTheReviews);
+    } else {
+      res.send({ message: "No reviews" });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+route.put("/:id", async (req, res, next) => {
+  try {
+    const reqId = req.params.id;
+    const productsToEdit = await fs.readJSON(productsDB);
+    const existenArrayOfProducts = productsToEdit.filter(
+      (e) => e._id !== reqId
+    );
+
+    const newArrayOfProducts = { ...req.body, id: reqId };
+    existenArrayOfProducts.push(newArrayOfProducts);
+
+    await fs.writeFile(productsDB, newArrayOfProducts);
+    res.status(201).send({ message: "successfully modified" });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+route.delete("/:id", async (req, res, next) => {
+  try {
+    const reqId = req.params.id;
+    const gettingProducts = await fs.readJSON(productsDB);
+    const deleteProducts = gettingProducts.filter((e) => e._id !== reqId);
+
+    gettingProducts.push(deleteProducts);
+    await fs.writeFile(gettingProducts);
+
+    res.status(201).send({ message: "Successfully deleted" });
+  } catch (error) {
+    console.log(error);
+  }
+});
 route.get("/:id", async (req, res, next) => {
   try {
     const products = await fs.readJSON(productsDB);
@@ -63,7 +102,9 @@ route.post("/:id/upload", upload.single("image"), async (req, res, next) => {
     const link = `${req.protocol}://${req.hostname}:${process.env.PORT}/${originalname}`;
     const products = await fs.readJSON(productsDB);
     const product = products.find((product) => product.id === req.params.id);
-    const oldProducts = products.filter((product) => product.id !== req.params.id);
+    const oldProducts = products.filter(
+      (product) => product.id !== req.params.id
+    );
     product.imageURL = link;
     product.updatedAt = new Date();
     oldProducts.push(product);
@@ -81,10 +122,16 @@ route.post(
   "/",
   [
     check("name").exists().notEmpty().withMessage("Name is mandatory field"),
-    check("description").exists().notEmpty().withMessage("description is mandatory field"),
+    check("description")
+      .exists()
+      .notEmpty()
+      .withMessage("description is mandatory field"),
     check("brand").exists().notEmpty().withMessage("brand is mandatory field"),
     check("price").exists().notEmpty().withMessage("price is mandatory field"),
-    check("category").exists().notEmpty().withMessage("category is mandatory field"),
+    check("category")
+      .exists()
+      .notEmpty()
+      .withMessage("category is mandatory field"),
   ],
   async (req, res, next) => {
     try {

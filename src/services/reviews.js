@@ -1,23 +1,17 @@
 import { Router } from "express";
-
 import { fileURLToPath } from "url";
-
 import { dirname, join } from "path";
 
 import { getReviews, writeReviews } from "../lib/fs-tools.js";
 
 import fs from "fs-extra";
-
 import multer from "multer";
-
 import { v4 as uniqid } from "uuid";
 
 import { checkSchema, check, validationResult } from "express-validator";
 
 const route = Router();
-
 const currentWorkingFile = fileURLToPath(import.meta.url);
-
 const currentWorkingDirectory = dirname(currentWorkingFile);
 
 const publicFolderDirectory = join(currentWorkingDirectory, "../../public");
@@ -26,8 +20,7 @@ const productsDB = join(currentWorkingDirectory, "../db/products.json");
 const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 
 route.get("/", async (req, res, next) => {
-  //localhost:3002/reviews?name=Bruce&ID=123412312 --> filtered list of students
-  http: try {
+  try {
     const reviews = await getReviews();
 
     if (req.query && req.query.comment) {
@@ -73,15 +66,6 @@ route.get("/:id", async (req, res, next) => {
     next(error);
   }
 });
-
-// {
-//   "_id": "123455", //SERVER GENERATED
-//   "comment": "A good book but definitely I don't like many parts of the plot", //REQUIRED
-//   "rate": 3, //REQUIRED, max 5
-//   "productId": "5d318e1a8541744830bef139", //REQUIRED
-//   "createdAt": "2019-08-01T12:46:45.895Z" // SERVER GENERATED
-// }
-
 route.post(
   "/",
   [
@@ -115,6 +99,21 @@ route.post(
     }
   }
 );
+route.put("/:id", async (req, res, next) => {
+  try {
+    const reqId = req.params.id;
+    const reviewsToEdit = await fs.readJSON(reviewsDB);
+    const existenArrayOfReview = reviewsToEdit.filter((e) => e._id !== reqId);
+
+    const newArrayOfReview = { ...req.body, id: reqId };
+    existenArrayOfReview.push(newArrayOfReview);
+
+    await fs.writeJSON(reviewsDB, newArrayOfReview);
+    res.status(201).send({ _id: newArrayOfReview._id });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 route.delete("/:id", async (req, res, next) => {
   try {
