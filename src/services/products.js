@@ -24,11 +24,6 @@ const publicFolderDirectory = join(currentWorkingDirectory, "../../public");
 const productsDB = join(currentWorkingDirectory, "../db/products.json");
 const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 
-route.get("/", async (req, res, next) => {
-  const products = await fs.readJSON(productsDB);
-  res.send(products);
-});
-
 route.get("/:id", async (req, res, next) => {
   try {
     const products = await fs.readJSON(productsDB);
