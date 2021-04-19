@@ -4,7 +4,7 @@ import { dirname, join } from "path";
 import fs from "fs-extra";
 import multer from "multer";
 import { v4 as uniqid } from "uuid";
-import { checkSchema, validationResult } from "express-validator";
+import { checkSchema, validationResult, check } from "express-validator";
 import { writeFile } from "fs";
 const route = Router();
 const currentWorkingFile = fileURLToPath(import.meta.url);
@@ -14,8 +14,7 @@ const productsDB = join(currentWorkingDirectory, "../db/products.json");
 const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 
 route.get("/", async (req, res, next) => {
-  //localhost:3002/reviews?name=Bruce&ID=123412312 --> filtered list of students
-  http: try {
+  try {
     const reviews = await getReviews();
 
     if (req.query && req.query.comment) {
@@ -61,15 +60,6 @@ route.get("/:id", async (req, res, next) => {
     next(error);
   }
 });
-
-// {
-//   "_id": "123455", //SERVER GENERATED
-//   "comment": "A good book but definitely I don't like many parts of the plot", //REQUIRED
-//   "rate": 3, //REQUIRED, max 5
-//   "productId": "5d318e1a8541744830bef139", //REQUIRED
-//   "createdAt": "2019-08-01T12:46:45.895Z" // SERVER GENERATED
-// }
-
 route.post(
   "/",
   [
@@ -132,5 +122,4 @@ route.delete("/:id", async (req, res, next) => {
   }
 });
 
-export default router;
 export default route;
