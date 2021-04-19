@@ -26,7 +26,18 @@ const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 
 route.get("/", async (req, res, next) => {
   const products = await fs.readJSON(productsDB);
-  res.send(products);
+
+  if (req.query && req.query.category) {
+    let filteredProducts = products.filter(
+      (product) =>
+        product.hasOwnProperty("category") &&
+        product.category === req.query.category
+    );
+
+    res.send(filteredProducts);
+  } else {
+    res.send(products);
+  }
 });
 
 route.get("/:id", async (req, res, next) => {
@@ -54,7 +65,9 @@ route.post("/:id/upload", upload.single("image"), async (req, res, next) => {
     const link = `${req.protocol}://${req.hostname}:${process.env.PORT}/${originalname}`;
     const products = await fs.readJSON(productsDB);
     const product = products.find((product) => product.id === req.params.id);
-    const oldProducts = products.filter((product) => product.id !== req.params.id);
+    const oldProducts = products.filter(
+      (product) => product.id !== req.params.id
+    );
     product.imageURL = link;
     product.updatedAt = new Date();
     oldProducts.push(product);
@@ -72,10 +85,16 @@ route.post(
   "/",
   [
     check("name").exists().notEmpty().withMessage("Name is mandatory field"),
-    check("description").exists().notEmpty().withMessage("description is mandatory field"),
+    check("description")
+      .exists()
+      .notEmpty()
+      .withMessage("description is mandatory field"),
     check("brand").exists().notEmpty().withMessage("brand is mandatory field"),
     check("price").exists().notEmpty().withMessage("price is mandatory field"),
-    check("category").exists().notEmpty().withMessage("category is mandatory field"),
+    check("category")
+      .exists()
+      .notEmpty()
+      .withMessage("category is mandatory field"),
   ],
   async (req, res, next) => {
     try {
@@ -96,7 +115,12 @@ route.post(
         };
         products.push(newProduct);
         await fs.writeJSON(productsDB, products);
-        res.status(201).send({ id: newProduct.id, message: "New product successfully created" });
+        res
+          .status(201)
+          .send({
+            id: newProduct.id,
+            message: "New product successfully created",
+          });
       }
     } catch (error) {
       console.log(error);
