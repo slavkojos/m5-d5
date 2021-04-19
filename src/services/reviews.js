@@ -16,13 +16,13 @@ const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 route.put("/:id", async (req, res, next) => {
   try {
     const reqId = req.params.id;
-    const reviewsToEdit = reviewsDB;
+    const reviewsToEdit = await reviewsDB;
     const existenArrayOfReview = reviewsToEdit.filter((e) => e._id !== reqId);
 
     const newArrayOfReview = { ...req.body, id: reqId };
     existenArrayOfReview.push(newArrayOfReview);
 
-    writeFile(existenArrayOfReview);
+    await writeFile(existenArrayOfReview);
     res.status(201).res.send({ _id: existenArrayOfReview._id });
   } catch (error) {
     console.log(error);
