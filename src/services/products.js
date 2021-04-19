@@ -33,9 +33,12 @@ route.get("/", async (req, res, next) => {
 
 route.get("/:id/reviews", async (req, res, next) => {
   try {
-    const gettingReviews = await fs.readJSON(productsDB);
+    const gettingReviews = await fs.readJSON(reviewsDB);
+    console.log("sadsa: ", gettingReviews);
     const reqId = req.params.id;
-    const grabbingTheReviews = gettingReviews.filter((e) => e._id === reqId);
+    const grabbingTheReviews = gettingReviews.filter(
+      (e) => e.productId === reqId
+    );
     if (grabbingTheReviews) {
       res.send(grabbingTheReviews);
     } else {
@@ -56,7 +59,7 @@ route.put("/:id", async (req, res, next) => {
     const newArrayOfProducts = { ...req.body, id: reqId };
     existenArrayOfProducts.push(newArrayOfProducts);
 
-    await fs.writeFile(productsDB, newArrayOfProducts);
+    await fs.writeJSON(productsDB, newArrayOfProducts);
     res.status(201).send({ message: "successfully modified" });
   } catch (error) {
     console.log(error);
@@ -67,10 +70,9 @@ route.delete("/:id", async (req, res, next) => {
   try {
     const reqId = req.params.id;
     const gettingProducts = await fs.readJSON(productsDB);
-    const deleteProducts = gettingProducts.filter((e) => e._id !== reqId);
+    const deleteProducts = gettingProducts.filter((e) => e.id !== reqId);
 
-    gettingProducts.push(deleteProducts);
-    await fs.writeFile(gettingProducts);
+    await fs.writeJSON(productsDB, deleteProducts);
 
     res.status(201).send({ message: "Successfully deleted" });
   } catch (error) {
@@ -94,29 +96,34 @@ route.get("/:id", async (req, res, next) => {
   }
 });
 
-route.post("/:id/upload", upload.single("image"), checkFileType(["image/jpeg", "image/png", "image/jpg"]), async (req, res, next) => {
-  try {
-    const { originalname, buffer, size } = req.file;
-    const finalDestination = join(publicFolderDirectory, originalname);
-    await fs.writeFile(finalDestination, buffer);
-    const link = `${req.protocol}://${req.hostname}:${process.env.PORT}/${originalname}`;
-    const products = await fs.readJSON(productsDB);
-    const product = products.find((product) => product.id === req.params.id);
-    const oldProducts = products.filter(
-      (product) => product.id !== req.params.id
-    );
-    product.imageURL = link;
-    product.updatedAt = new Date();
-    oldProducts.push(product);
-    await fs.writeJSON(productsDB, products);
-    res.send("ok");
-  } catch (err) {
-    console.log(err);
-    const error = new Error(err.message);
-    error.httpStatusCode = 500;
-    next(error);
+route.post(
+  "/:id/upload",
+  upload.single("image"),
+  checkFileType(["image/jpeg", "image/png", "image/jpg"]),
+  async (req, res, next) => {
+    try {
+      const { originalname, buffer, size } = req.file;
+      const finalDestination = join(publicFolderDirectory, originalname);
+      await fs.writeFile(finalDestination, buffer);
+      const link = `${req.protocol}://${req.hostname}:${process.env.PORT}/${originalname}`;
+      const products = await fs.readJSON(productsDB);
+      const product = products.find((product) => product.id === req.params.id);
+      const oldProducts = products.filter(
+        (product) => product.id !== req.params.id
+      );
+      product.imageURL = link;
+      product.updatedAt = new Date();
+      oldProducts.push(product);
+      await fs.writeJSON(productsDB, products);
+      res.send("ok");
+    } catch (err) {
+      console.log(err);
+      const error = new Error(err.message);
+      error.httpStatusCode = 500;
+      next(error);
+    }
   }
-});
+);
 
 route.post(
   "/",

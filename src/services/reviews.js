@@ -105,7 +105,7 @@ route.put("/:id", async (req, res, next) => {
     const reviewsToEdit = await fs.readJSON(reviewsDB);
     const existenArrayOfReview = reviewsToEdit.filter((e) => e._id !== reqId);
 
-    const newArrayOfReview = { ...req.body, id: reqId };
+    const newArrayOfReview = { ...req.body, id: reqId, modifedAt: new Date() };
     existenArrayOfReview.push(newArrayOfReview);
 
     await fs.writeJSON(reviewsDB, newArrayOfReview);
