@@ -94,7 +94,7 @@ route.get("/:id", async (req, res, next) => {
   }
 });
 
-route.post("/:id/upload", upload.single("image"), async (req, res, next) => {
+route.post("/:id/upload", upload.single("image"), checkFileType(["image/jpeg", "image/png", "image/jpg"]), async (req, res, next) => {
   try {
     const { originalname, buffer, size } = req.file;
     const finalDestination = join(publicFolderDirectory, originalname);
