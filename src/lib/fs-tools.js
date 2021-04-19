@@ -4,10 +4,7 @@ import { dirname, join } from "path";
 
 const { readJSON, writeJSON, writeFile, createReadStream } = fs;
 
-const reviewsDB = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "../db/reviews.json"
-);
+const reviewsDB = join(dirname(fileURLToPath(import.meta.url)), "../db");
 
 const publicProductDB = join(
   dirname(fileURLToPath(import.meta.url)),
