@@ -10,7 +10,7 @@ import multer from "multer";
 
 import { v4 as uniqid } from "uuid";
 
-import { checkSchema, validationResult } from "express-validator";
+import { checkSchema, check, validationResult } from "express-validator";
 
 const route = Router();
 
@@ -126,7 +126,5 @@ route.delete("/:id", async (req, res, next) => {
     console.log(error);
   }
 });
-
-export default router;
 
 export default route;
