@@ -18,7 +18,7 @@ const productsDB = join(currentWorkingDirectory, "../db/products.json");
 const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 
 route.get("/", async (req, res, next) => {
-  const filterProducts = await productsDB;
+  const filterProducts = await fs.readJSON(productsDB);
   if (req.query && req.query.name) {
     const filteringProducts = filterProducts.filter(
       (e) => e.name === req.query.name
@@ -55,8 +55,8 @@ route.put("/:id", async (req, res, next) => {
     const newArrayOfProducts = { ...req.body, id: reqId };
     existenArrayOfProducts.push(newArrayOfProducts);
 
-    await fs.writeFile(existenArrayOfProducts);
-    res.status(201).res.send({ message: "successfully modified" });
+    await fs.writeFile(productsDB, newArrayOfProducts);
+    res.status(201).send({ message: "successfully modified" });
   } catch (error) {
     console.log(error);
   }

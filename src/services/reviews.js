@@ -102,14 +102,14 @@ route.post(
 route.put("/:id", async (req, res, next) => {
   try {
     const reqId = req.params.id;
-    const reviewsToEdit = await reviewsDB;
+    const reviewsToEdit = await fs.readJSON(reviewsDB);
     const existenArrayOfReview = reviewsToEdit.filter((e) => e._id !== reqId);
 
     const newArrayOfReview = { ...req.body, id: reqId };
     existenArrayOfReview.push(newArrayOfReview);
 
-    await fs.writeFile(existenArrayOfReview);
-    res.status(201).res.send({ _id: existenArrayOfReview._id });
+    await fs.writeJSON(reviewsDB, newArrayOfReview);
+    res.status(201).send({ _id: newArrayOfReview._id });
   } catch (error) {
     console.log(error);
   }
