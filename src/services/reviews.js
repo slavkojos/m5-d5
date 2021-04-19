@@ -1,15 +1,21 @@
 import { Router } from "express";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+
+import { getReviews, writeReviews } from "../lib/fs-tools.js";
+
 import fs from "fs-extra";
 import multer from "multer";
 import { v4 as uniqid } from "uuid";
-import { checkSchema, validationResult, check } from "express-validator";
-import { writeFile } from "fs";
+
+import { checkSchema, check, validationResult } from "express-validator";
+
 const route = Router();
 const currentWorkingFile = fileURLToPath(import.meta.url);
 const currentWorkingDirectory = dirname(currentWorkingFile);
-const publicFolderDirectory = join(currentWorkingDirectory, "../../../public");
+
+const publicFolderDirectory = join(currentWorkingDirectory, "../../public");
+
 const productsDB = join(currentWorkingDirectory, "../db/products.json");
 const reviewsDB = join(currentWorkingDirectory, "../db/reviews.json");
 
@@ -63,8 +69,9 @@ route.get("/:id", async (req, res, next) => {
 route.post(
   "/",
   [
-    check("comment").exists().withMessage("Comment is mandatory field!"),
+    check("comment").exists().withMessage("Comment cannot be empty"),
     check("rate").isInt().withMessage("Rating must be an integer!"),
+    check("productId").exists().withMessage("A product ID must be included"),
   ],
   async (req, res, next) => {
     try {
@@ -84,7 +91,7 @@ route.post(
 
         await writeReviews(reviews);
 
-        res.status(201).send({ _id: newReview.ID });
+        res.status(201).send({ _id: newReview._id });
       }
     } catch (error) {
       error.httpStatusCode = 500;
@@ -101,7 +108,7 @@ route.put("/:id", async (req, res, next) => {
     const newArrayOfReview = { ...req.body, id: reqId };
     existenArrayOfReview.push(newArrayOfReview);
 
-    await writeFile(existenArrayOfReview);
+    await fs.writeFile(existenArrayOfReview);
     res.status(201).res.send({ _id: existenArrayOfReview._id });
   } catch (error) {
     console.log(error);
