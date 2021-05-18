@@ -6,6 +6,9 @@ import multer from "multer";
 import { v4 as uniqid } from "uuid";
 import { checkSchema, validationResult, check } from "express-validator";
 import checkFileType from "../middlewares/checkfiletype.js";
+import { getBooksReadStream } from "../lib/fs-tools.js";
+import { pipeline } from "stream";
+import { Transform } from "json2csv";
 const route = Router();
 const upload = multer();
 
@@ -48,6 +51,27 @@ route.get("/:id/reviews", async (req, res, next) => {
     console.log(error);
   }
 });
+
+route.get("/:exportToCSV", async (req, res, next) => {
+  try {
+    const fields = ["id", "description", "name", "brand", "category"]; //fields from the data
+    const opts = { fields }; //creates field objects
+    const json2csv = new Transform(opts);
+
+    //Content-Disposition is so that it saves the file on disc
+    res.setHeader("Content-Disposition", `attachment; filename=export.csv`);
+
+    const fileStream = getBooksReadStream();
+    pipeline(fileStream, json2csv, res, (err) => {
+      if (err) {
+        next(err);
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 route.put("/:id", async (req, res, next) => {
   try {
     const reqId = req.params.id;

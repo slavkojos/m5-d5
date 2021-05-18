@@ -65,6 +65,7 @@ route.get("/:id", async (req, res, next) => {
     next(error);
   }
 });
+
 route.post(
   "/",
   [
@@ -98,13 +99,17 @@ route.post(
     }
   }
 );
+/**
+ *
+ *  scss
+ */
 route.put("/:id", async (req, res, next) => {
   try {
     const reqId = req.params.id;
     const reviewsToEdit = await fs.readJSON(reviewsDB);
     const existenArrayOfReview = reviewsToEdit.filter((e) => e._id !== reqId);
 
-    const newArrayOfReview = { ...req.body, id: reqId, modifedAt: new Date() };
+    const newArrayOfReview = { ...req.body, id: reqId };
     existenArrayOfReview.push(newArrayOfReview);
 
     await fs.writeJSON(reviewsDB, newArrayOfReview);

@@ -4,7 +4,7 @@ import { dirname, join } from "path";
 
 const { readJSON, writeJSON, writeFile, createReadStream } = fs;
 
-const reviewsDB = join(dirname(fileURLToPath(import.meta.url)), "../db");
+const dataFolderPath = join(dirname(fileURLToPath(import.meta.url)), "../db");
 
 const publicProductDB = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -16,16 +16,19 @@ console.log(publicProductDB);
 
 // CRUD FILE PATHS
 export const getReviews = async () =>
-  await readJSON(join(reviewsDB, "reviews.json"));
+  await readJSON(join(dataFolderPath, "reviews.json"));
 
 export const writeReviews = async (content) =>
-  await writeJSON(join(reviewsDB, "reviews.json"), content);
+  await writeJSON(join(dataFolderPath, "reviews.json"), content);
 
 export const getProducts = async () =>
-  await readJSON(join(reviewsDB, "products.json"));
+  await readJSON(join(dataFolderPath, "products.json"));
+
+export const getBooksReadStream = () =>
+  fs.createReadStream(join(dataFolderPath, "products.json"));
 
 export const writeProducts = async (content) =>
-  await writeJSON(join(reviewsDB, "products.json"), content);
+  await writeJSON(join(dataFolderPath, "products.json"), content);
 
 export const writeProductPictures = async (fileName, content) =>
   await writeFile(join(publicProductDB, fileName), content);
